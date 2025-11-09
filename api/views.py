@@ -44,21 +44,25 @@ class RoleViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser] # Only admin can manage users
+
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [IsAdminUser]
+        elif self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, HasPermission('view_user')]
+        elif self.action in ['update', 'partial_update']:
+            permission_classes = [IsAuthenticated, HasPermission('edit_user')]
+        elif self.action == 'destroy':
+            permission_classes = [IsAdminUser] # Only admin can delete users
+        else:
+            permission_classes = [IsAdminUser] # Default for list
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         # Allow non-admin users to view their own profile
         if self.action == 'retrieve' and not self.request.user.is_staff:
             return User.objects.filter(id=self.request.user.id)
         return super().get_queryset()
-
-    def get_permissions(self):
-        if self.action == 'create': # Only admin can create users
-            self.permission_classes = [IsAdminUser]
-        elif self.action in ['retrieve', 'update', 'partial_update', 'destroy']:
-            # Admin can manage any user, regular user can only view/update their own profile
-            self.permission_classes = [IsAdminUser | (IsAuthenticated and HasPermission('view_user'))] # Placeholder for view_user permission
-        return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -70,13 +74,16 @@ class UserViewSet(viewsets.ModelViewSet):
 class CitizenViewSet(viewsets.ModelViewSet):
     queryset = Citizen.objects.all()
     serializer_class = CitizenSerializer
-    permission_classes = [IsAuthenticated, HasPermission('view_citizen')] # Default permission
 
     def get_permissions(self):
-        if self.action == 'create':
-            self.permission_classes = [IsAuthenticated, HasPermission('create_citizen')]
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated, HasPermission('view_citizen')]
+        elif self.action == 'create':
+            permission_classes = [IsAuthenticated, HasPermission('create_citizen')]
         elif self.action in ['update', 'partial_update']:
-            self.permission_classes = [IsAuthenticated, HasPermission('edit_citizen')]
+            permission_classes = [IsAuthenticated, HasPermission('edit_citizen')]
         elif self.action == 'destroy':
-            self.permission_classes = [IsAuthenticated, HasPermission('delete_citizen')]
-        return super().get_permissions()
+            permission_classes = [IsAuthenticated, HasPermission('delete_citizen')]
+        else:
+            permission_classes = [IsAuthenticated] # Default for other actions
+        return [permission() for permission in permission_classes]
