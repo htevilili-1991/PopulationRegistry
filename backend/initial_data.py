@@ -3,6 +3,10 @@ from backend.database import SessionLocal, engine
 from backend import models, crud, schemas
 from backend.security import get_password_hash
 
+def drop_all_tables():
+    models.Base.metadata.drop_all(bind=engine)
+    print("All tables dropped.")
+
 # Ensure all tables are created
 models.Base.metadata.create_all(bind=engine)
 
@@ -68,6 +72,8 @@ def create_initial_data(db: Session):
 if __name__ == "__main__":
     db = SessionLocal()
     try:
+        drop_all_tables() # Drop existing tables
+        models.Base.metadata.create_all(bind=engine) # Recreate tables
         create_initial_data(db)
     finally:
         db.close()
