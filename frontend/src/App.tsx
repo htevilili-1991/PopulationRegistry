@@ -1,11 +1,65 @@
-import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { Routes, Route, Link, useNavigate, Outlet, Navigate } from 'react-router-dom';
 import './App.css';
 import CitizenList from './components/CitizenList';
 import AddCitizen from './components/AddCitizen';
 import EditCitizen from './components/EditCitizen';
+import Login from './components/Login';
+import Register from './components/Register';
+import { User } from './types'; // Assuming you have a User type defined
+
+interface AuthContextType {
+  user: User | null;
+  login: (token: string) => void;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      // In a real app, you would validate the token and fetch user details
+      // For now, we'll just assume a token means logged in
+      setUser({ id: 1, username: 'test', email: 'test@example.com', is_active: true, role: { id: 1, name: 'admin', permissions: [] } }); // Placeholder user
+    }
+  }, []);
+
+  const login = (token: string) => {
+    localStorage.setItem('access_token', token);
+    // In a real app, decode token or fetch user details
+    setUser({ id: 1, username: 'test', email: 'test@example.com', is_active: true, role: { id: 1, name: 'admin', permissions: [] } }); // Placeholder user
+    navigate('/citizens');
+  };
+
+  const logout = () => {
+    localStorage.removeItem('access_token');
+    setUser(null);
+    navigate('/login');
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+const PrivateRoute = ({ children }: { children: React.ReactElement }): React.ReactElement | null => {
+  const auth = useContext(AuthContext);
+  if (!auth?.user) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 function App() {
+  const auth = useContext(AuthContext);
+
   return (
     <div className="App d-flex">
       {/* Sidebar */}
@@ -25,6 +79,27 @@ function App() {
               Add Citizen
             </Link>
           </li>
+          {!auth?.user && (
+            <>
+              <li>
+                <Link to="/login" className="nav-link text-white">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="nav-link text-white">
+                  Register
+                </Link>
+              </li>
+            </>
+          )}
+          {auth?.user && (
+            <li>
+              <button onClick={auth.logout} className="nav-link text-white btn btn-link">
+                Logout ({auth.user.username})
+              </button>
+            </li>
+          )}
         </ul>
         <hr />
       </div>
@@ -32,14 +107,22 @@ function App() {
       {/* Main Content */}
       <div className="container-fluid p-4">
         <Routes>
-          <Route path="/" element={<CitizenList />} />
-          <Route path="/citizens" element={<CitizenList />} />
-          <Route path="/add-citizen" element={<AddCitizen />} />
-          <Route path="/edit-citizen/:id" element={<EditCitizen />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<PrivateRoute><CitizenList /></PrivateRoute>} />
+          <Route path="/citizens" element={<PrivateRoute><CitizenList /></PrivateRoute>} />
+          <Route path="/add-citizen" element={<PrivateRoute><AddCitizen /></PrivateRoute>} />
+          <Route path="/edit-citizen/:id" element={<PrivateRoute><EditCitizen /></PrivateRoute>} />
         </Routes>
       </div>
     </div>
   );
 }
 
-export default App;
+const AppWrapper: React.FC = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+
+export default AppWrapper;
