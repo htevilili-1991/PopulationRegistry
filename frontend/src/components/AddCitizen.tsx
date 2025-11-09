@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const AddCitizen: React.FC = () => {
     const navigate = useNavigate();
     const [citizen, setCitizen] = useState<CitizenCreate>({
+        national_id: '',
         first_name: '',
         last_name: '',
         date_of_birth: '',
@@ -27,6 +28,10 @@ const AddCitizen: React.FC = () => {
         <div>
             <h2>Add New Citizen</h2>
             <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                    <label htmlFor="national_id" className="form-label">National ID</label>
+                    <input type="text" className="form-control" id="national_id" name="national_id" value={citizen.national_id} onChange={handleChange} required />
+                </div>
                 <div className="mb-3">
                     <label htmlFor="first_name" className="form-label">First Name</label>
                     <input type="text" className="form-control" id="first_name" name="first_name" value={citizen.first_name} onChange={handleChange} required />
