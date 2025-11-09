@@ -48,3 +48,17 @@ def read_citizen(citizen_id: int, db: Session = Depends(get_db)):
     if db_citizen is None:
         raise HTTPException(status_code=404, detail="Citizen not found")
     return db_citizen
+
+@app.put("/citizens/{citizen_id}", response_model=schemas.Citizen)
+def update_citizen(citizen_id: int, citizen: schemas.CitizenUpdate, db: Session = Depends(get_db)):
+    db_citizen = crud.update_citizen(db=db, citizen_id=citizen_id, citizen=citizen)
+    if db_citizen is None:
+        raise HTTPException(status_code=404, detail="Citizen not found")
+    return db_citizen
+
+@app.delete("/citizens/{citizen_id}", response_model=schemas.Citizen)
+def delete_citizen(citizen_id: int, db: Session = Depends(get_db)):
+    db_citizen = crud.delete_citizen(db=db, citizen_id=citizen_id)
+    if db_citizen is None:
+        raise HTTPException(status_code=404, detail="Citizen not found")
+    return db_citizen
