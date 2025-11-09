@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 class CitizenBase(BaseModel):
     national_id: str
@@ -23,6 +23,47 @@ class CitizenUpdate(BaseModel):
 class Citizen(CitizenBase):
     id: int
     national_id: str
+
+    class Config:
+        orm_mode = True
+
+class PermissionBase(BaseModel):
+    name: str
+
+class PermissionCreate(PermissionBase):
+    pass
+
+class Permission(PermissionBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class RoleBase(BaseModel):
+    name: str
+
+class RoleCreate(RoleBase):
+    permission_ids: List[int] = []
+
+class Role(RoleBase):
+    id: int
+    permissions: List[Permission] = []
+
+    class Config:
+        orm_mode = True
+
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+    role_id: int
+
+class User(UserBase):
+    id: int
+    is_active: bool
+    role: Role
 
     class Config:
         orm_mode = True
