@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend import crud, models, schemas
 from backend.database import SessionLocal, engine
@@ -10,6 +11,19 @@ from backend.database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000", # React app default port
+    "http://localhost:3001", # React app if it runs on 3001
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency
 def get_db():
