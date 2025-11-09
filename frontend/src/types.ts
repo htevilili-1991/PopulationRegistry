@@ -36,6 +36,11 @@ export interface Role {
     permissions: Permission[];
 }
 
+export interface Profile {
+    id: number;
+    role: Role;
+}
+
 export interface UserCreate {
     username: string;
     email: string;
@@ -48,6 +53,12 @@ export interface User {
     username: string;
     email: string;
     is_active: boolean;
-    role: Role;
+    is_staff: boolean; // Added for Django admin status
+    profile: Profile; // Link to the Profile model
+}
+
+export interface TokenResponse {
+    access: string;
+    refresh: string;
 }
 

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import './App.css';
 import CitizenList from './components/CitizenList';
@@ -7,39 +7,49 @@ import EditCitizen from './components/EditCitizen';
 import Login from './components/Login';
 // import Register from './components/Register'; // Register component is no longer publicly accessible
 import { User } from './types'; // Assuming you have a User type defined
+import { fetchCurrentUser } from './api'; // Import the new API call
 
 interface AuthContextType {
   user: User | null;
-  login: (token: string) => void;
+  login: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      // In a real app, you would validate the token and fetch user details
-      // For now, we'll just assume a token means logged in
-      // TODO: Fetch actual user data from backend using the token
-      setUser({ id: 1, username: 'test', email: 'test@example.com', is_active: true, role: { id: 1, name: 'admin', permissions: [] } }); // Placeholder user
+  const loadUser = useCallback(async () => {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      try {
+        const currentUser = await fetchCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setUser(null);
+      }
     }
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem('access_token', token);
-    // In a real app, decode token or fetch user details
-    // TODO: Fetch actual user data from backend using the token
-    setUser({ id: 1, username: 'test', email: 'test@example.com', is_active: true, role: { id: 1, name: 'admin', permissions: [] } }); // Placeholder user
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
+
+  const login = (accessToken: string, refreshToken: string) => {
+    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('refresh_token', refreshToken);
+    loadUser(); // Fetch user details after login
     navigate('/citizens');
   };
 
   const logout = () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     setUser(null);
     navigate('/login');
   };

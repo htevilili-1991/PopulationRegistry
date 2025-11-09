@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { loginUser } from '../api';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../App'; // Import AuthContext
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
+    const auth = useContext(AuthContext); // Use AuthContext
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -11,11 +13,13 @@ const Login: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = await loginUser(username, password);
-            localStorage.setItem('access_token', token);
+            const response = await loginUser(username, password); // Now returns TokenResponse
+            if (auth) {
+                auth.login(response.access, response.refresh); // Pass both tokens to auth.login
+            }
             navigate('/citizens'); // Redirect to citizens list after login
-        } catch (err) {
-            setError('Invalid username or password');
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Invalid username or password');
         }
     };
 
