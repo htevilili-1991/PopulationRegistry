@@ -3,6 +3,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import CitizenList from './components/CitizenList';
 import AddCitizen from './components/AddCitizen';
+import EditCitizen from './components/EditCitizen';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/" element={<CitizenList />} />
           <Route path="/citizens" element={<CitizenList />} />
           <Route path="/add-citizen" element={<AddCitizen />} />
+          <Route path="/edit-citizen/:id" element={<EditCitizen />} />
         </Routes>
       </div>
     </div>
