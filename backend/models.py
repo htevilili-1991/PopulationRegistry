@@ -1,6 +1,8 @@
 import uuid
 from sqlalchemy import Column, String, Date, BigInteger
-from .database import Base
+import uuid
+from sqlalchemy import Column, String, Date, BigInteger
+from backend.database import Base
 
 class Citizen(Base):
     __tablename__ = "citizens"

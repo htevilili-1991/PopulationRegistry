@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
+from sqlalchemy.orm import Session
+from backend import models, schemas
 
 def get_citizen(db: Session, citizen_id: int):
     return db.query(models.Citizen).filter(models.Citizen.id == citizen_id).first()
