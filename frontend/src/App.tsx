@@ -6,23 +6,30 @@ import AddCitizen from './components/AddCitizen';
 
 function App() {
   return (
-    <div className="App">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container-fluid">
-          <Link className="navbar-brand" to="/">Population Registry</Link>
-          <div className="collapse navbar-collapse">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <Link className="nav-link" to="/citizens">View Citizens</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/add-citizen">Add Citizen</Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-      <div className="container mt-3">
+    <div className="App d-flex">
+      {/* Sidebar */}
+      <div className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style={{ width: '280px', height: '100vh' }}>
+        <Link to="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+          <span className="fs-4">Population Registry</span>
+        </Link>
+        <hr />
+        <ul className="nav nav-pills flex-column mb-auto">
+          <li className="nav-item">
+            <Link to="/citizens" className="nav-link text-white" aria-current="page">
+              View Citizens
+            </Link>
+          </li>
+          <li>
+            <Link to="/add-citizen" className="nav-link text-white">
+              Add Citizen
+            </Link>
+          </li>
+        </ul>
+        <hr />
+      </div>
+
+      {/* Main Content */}
+      <div className="container-fluid p-4">
         <Routes>
           <Route path="/" element={<CitizenList />} />
           <Route path="/citizens" element={<CitizenList />} />
