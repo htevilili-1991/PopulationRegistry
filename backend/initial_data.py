@@ -45,7 +45,7 @@ def create_initial_data(db: Session):
             user=schemas.UserCreate(
                 username="admin",
                 email="admin@example.com",
-                password="adminpassword", # TODO: Change default password in production
+                password="admin", # TODO: Change default password in production
                 role_id=admin_role.id
             )
         )
@@ -58,7 +58,7 @@ def create_initial_data(db: Session):
             user=schemas.UserCreate(
                 username="user",
                 email="user@example.com",
-                password="userpassword", # TODO: Change default password in production
+                password="user", # TODO: Change default password in production
                 role_id=user_role.id
             )
         )
