@@ -5,14 +5,6 @@ from backend.database import Base
 
 metadata = MetaData()
 
-# Association table for Role-Permission many-to-many relationship
-role_permissions = Table(
-    'role_permissions',
-    metadata,
-    Column('role_id', BigInteger, ForeignKey('roles.id'), primary_key=True),
-    Column('permission_id', BigInteger, ForeignKey('permissions.id'), primary_key=True)
-)
-
 class Citizen(Base):
     __tablename__ = "citizens"
 
@@ -45,7 +37,7 @@ class Role(Base):
     users = relationship("User", back_populates="role")
     permissions = relationship(
         "Permission",
-        secondary=role_permissions,
+        secondary="role_permissions", # Use string name for secondary table
         back_populates="roles"
     )
 
@@ -57,7 +49,14 @@ class Permission(Base):
 
     roles = relationship(
         "Role",
-        secondary=role_permissions,
+        secondary="role_permissions", # Use string name for secondary table
         back_populates="permissions"
     )
 
+# Association table for Role-Permission many-to-many relationship
+role_permissions = Table(
+    'role_permissions',
+    Base.metadata, # Use Base.metadata instead of local metadata object
+    Column('role_id', BigInteger, ForeignKey('roles.id'), primary_key=True),
+    Column('permission_id', BigInteger, ForeignKey('permissions.id'), primary_key=True)
+)
